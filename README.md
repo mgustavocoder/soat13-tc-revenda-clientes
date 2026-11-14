@@ -23,6 +23,35 @@ credenciais AWS no projeto.
 - `POST /api/clientes` com `{ "nome": "...", "cpf": "12345678901", "email": "..." }`
 - `GET /internal/clientes/:cpf` para consulta via API por outros serviços
 
+## Arquitetura
+
+O código segue Clean Architecture; as dependências apontam sempre para dentro
+(infraestrutura → aplicação → domínio):
+
+```
+src/
+├── domain/                     # Regras de negócio puras, sem dependências externas
+│   ├── entities/
+│   │   ├── cliente.js          # Entidade e validação do cadastro
+│   │   └── value-objects/      # Cpf, Email
+│   └── errors/                 # InvalidInput, ResourceNotFound, DuplicateResource
+├── application/
+│   ├── gateways/
+│   │   └── cliente-repository.js   # Porta (interface) de persistência
+│   └── usecases/
+│       └── cliente-usecase.js      # Listar, buscar por CPF, cadastrar
+└── infrastructure/             # Detalhes: Express, MySQL, logs
+    ├── api/                    # app.js, server.js, mapeamento de erros → HTTP
+    ├── controllers/            # Controllers, wire-in (entrada) e factory (composição)
+    └── datasource/             # Pool MySQL e implementação do repositório
+```
+
+Testes: `npm test` executa testes unitários de domínio e casos de uso
+(`test/unit`) e testes da API com o banco simulado (`test/integration`).
+
+Este serviço não participa da saga de vendas: o serviço de vendas apenas
+consulta `GET /internal/clientes/:cpf` antes de iniciar a saga.
+
 ## AWS
 
 O deploy de produção usa a imagem deste serviço no ECR e o manifesto Kubernetes

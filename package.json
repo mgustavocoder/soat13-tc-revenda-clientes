@@ -8,8 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
+    "start": "node src/infrastructure/api/server.js",
+    "dev": "node --watch src/infrastructure/api/server.js",
     "test": "node --test"
   },
   "dependencies": {
